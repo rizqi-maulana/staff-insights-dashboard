@@ -3,8 +3,18 @@ import React, { useState } from 'react';
 import Layout from '../components/Layout';
 import MobileNav from '../components/MobileNav';
 import { useAppContext } from '../contexts/AppContext';
-import { Eye, FileText } from 'lucide-react';
+import { Eye, FileText, Bell, CalendarDays } from 'lucide-react';
 import StaffDetailModal from '../components/modals/StaffDetailModal';
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 const NotificationsPage: React.FC = () => {
   const { notifications, staffList, exportToExcel } = useAppContext();
@@ -26,7 +36,10 @@ const NotificationsPage: React.FC = () => {
   return (
     <Layout>
       <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
-        <h1 className="text-2xl font-bold">Notifications</h1>
+        <div className="flex items-center">
+          <Bell className="h-6 w-6 text-primary mr-2" />
+          <h1 className="text-2xl font-bold">Notifications</h1>
+        </div>
         
         <div className="mt-4 md:mt-0 flex flex-col md:flex-row gap-3">
           <select
@@ -49,57 +62,67 @@ const NotificationsPage: React.FC = () => {
         </div>
       </div>
       
-      <div className="bg-white rounded-lg shadow-md overflow-x-auto">
-        <table className="table-container">
-          <thead>
-            <tr>
-              <th className="table-header rounded-tl-lg">#</th>
-              <th className="table-header">Staff</th>
-              <th className="table-header">Type</th>
-              <th className="table-header">Date</th>
-              <th className="table-header">Message</th>
-              <th className="table-header rounded-tr-lg">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredNotifications.map((notification, index) => (
-              <tr key={notification.id} className="table-row">
-                <td className="table-cell font-medium">{index + 1}</td>
-                <td className="table-cell">{notification.staffName}</td>
-                <td className="table-cell">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    notification.type === 'permission'
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : 'bg-blue-100 text-blue-800'
-                  }`}>
-                    {notification.type.charAt(0).toUpperCase() + notification.type.slice(1)}
-                  </span>
-                </td>
-                <td className="table-cell">
-                  {new Date(notification.date).toLocaleDateString()}
-                </td>
-                <td className="table-cell">{notification.message}</td>
-                <td className="table-cell">
-                  <button
-                    onClick={() => handleViewDetails(notification.staffId)}
-                    className="flex items-center text-primary hover:text-primary-dark"
-                  >
-                    <Eye size={18} className="mr-1" />
-                    See Details
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {filteredNotifications.length === 0 && (
-              <tr>
-                <td colSpan={6} className="table-cell text-center py-8 text-gray-500">
-                  No notifications found
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <Card>
+        <CardHeader className="border-b bg-muted/40">
+          <CardTitle>Notification List</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-12">#</TableHead>
+                <TableHead>Staff</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Message</TableHead>
+                <TableHead className="w-[100px]">Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredNotifications.map((notification, index) => (
+                <TableRow key={notification.id} className="hover:bg-muted/50">
+                  <TableCell className="font-medium">{index + 1}</TableCell>
+                  <TableCell>{notification.staffName}</TableCell>
+                  <TableCell>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      notification.type === 'permission'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : 'bg-blue-100 text-blue-800'
+                    }`}>
+                      {notification.type.charAt(0).toUpperCase() + notification.type.slice(1)}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center">
+                      <CalendarDays size={14} className="mr-1 text-gray-500" />
+                      {new Date(notification.date).toLocaleDateString()}
+                    </div>
+                  </TableCell>
+                  <TableCell>{notification.message}</TableCell>
+                  <TableCell>
+                    <Button
+                      onClick={() => handleViewDetails(notification.staffId)}
+                      variant="ghost"
+                      size="sm"
+                      className="flex items-center text-primary hover:text-primary hover:bg-primary/10"
+                    >
+                      <Eye size={16} className="mr-1" />
+                      Details
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {filteredNotifications.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} className="h-24 text-center text-gray-500">
+                    No notifications found
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
       
       {selectedStaff && (
         <StaffDetailModal

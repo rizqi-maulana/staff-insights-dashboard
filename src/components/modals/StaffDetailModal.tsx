@@ -1,8 +1,9 @@
 
 import React from 'react';
-import { X, CheckCircle, AlertCircle, RefreshCw, Trash2 } from 'lucide-react';
+import { X, CheckCircle, AlertCircle, RefreshCw, Trash2, User } from 'lucide-react';
 import { Staff, useAppContext } from '../../contexts/AppContext';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 interface StaffDetailModalProps {
   staff: Staff;
@@ -12,6 +13,7 @@ interface StaffDetailModalProps {
 const StaffDetailModal: React.FC<StaffDetailModalProps> = ({ staff, onClose }) => {
   const { toggleStaffStatus, resetDevice, deleteStaff } = useAppContext();
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   const handleToggleStatus = () => {
     toggleStaffStatus(staff.id);
@@ -41,9 +43,14 @@ const StaffDetailModal: React.FC<StaffDetailModalProps> = ({ staff, onClose }) =
     }
   };
 
+  const handleViewDetails = () => {
+    navigate(`/staff/${staff.id}`);
+    onClose();
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
         <div className="p-6 relative">
           <button 
             onClick={onClose}
@@ -64,9 +71,7 @@ const StaffDetailModal: React.FC<StaffDetailModalProps> = ({ staff, onClose }) =
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <span className="text-4xl text-gray-500">
-                    {staff.name.charAt(0)}
-                  </span>
+                  <User size={64} className="text-gray-400" />
                 )}
               </div>
               
@@ -95,6 +100,14 @@ const StaffDetailModal: React.FC<StaffDetailModalProps> = ({ staff, onClose }) =
           </div>
           
           <div className="border-t mt-6 pt-6 flex flex-wrap gap-3 justify-end">
+            <button
+              onClick={handleViewDetails}
+              className="flex items-center bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-md transition-colors"
+            >
+              <User size={18} className="mr-2" />
+              View Full Details
+            </button>
+            
             <button
               onClick={handleToggleStatus}
               className={`flex items-center ${

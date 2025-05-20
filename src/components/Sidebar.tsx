@@ -30,8 +30,8 @@ const NavItem: React.FC<NavItemProps> = ({ to, icon, label }) => {
     <NavLink
       to={to}
       className={({ isActive }) =>
-        `flex items-center p-3 rounded-lg transition-colors ${
-          isActive ? 'bg-white text-primary font-medium' : 'hover:bg-primary-600 hover:bg-opacity-50'
+        `flex items-center p-3 rounded-lg transition-all ${
+          isActive ? 'bg-white text-primary font-medium shadow-md' : 'hover:bg-primary-600 hover:bg-opacity-50'
         }`
       }
     >
