@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { BarChart3, Users, Bell, Home } from 'lucide-react';
+import { BarChart3, Users, Bell, Home, UserPlus } from 'lucide-react';
 
 const Sidebar: React.FC = () => {
   return (
@@ -13,6 +13,7 @@ const Sidebar: React.FC = () => {
       <div className="space-y-2">
         <NavItem to="/dashboard" icon={<Home size={20} />} label="Dashboard" />
         <NavItem to="/staff" icon={<Users size={20} />} label="Staff List" />
+        <NavItem to="/staff/add" icon={<UserPlus size={20} />} label="Add Staff" />
         <NavItem to="/notifications" icon={<Bell size={20} />} label="Notifications" />
       </div>
     </nav>

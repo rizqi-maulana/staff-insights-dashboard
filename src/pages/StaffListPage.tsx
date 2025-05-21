@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import Layout from '../components/Layout';
 import MobileNav from '../components/MobileNav';
 import { useAppContext } from '../contexts/AppContext';
-import { Eye, FileText, Users, Search } from 'lucide-react';
+import { Eye, FileText, Users, Search, UserPlus } from 'lucide-react';
 import StaffDetailModal from '../components/modals/StaffDetailModal';
 import { 
   Table, 
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 const StaffListPage: React.FC = () => {
   const { staffList, exportToExcel } = useAppContext();
@@ -54,13 +55,21 @@ const StaffListPage: React.FC = () => {
               className="pl-10 input-field w-full md:w-64"
             />
           </div>
-          <button
-            onClick={exportToExcel}
-            className="flex items-center btn-secondary"
-          >
-            <FileText size={18} className="mr-2" />
-            Export to Excel
-          </button>
+          <div className="flex gap-2">
+            <Button asChild variant="default">
+              <Link to="/staff/add" className="flex items-center">
+                <UserPlus size={18} className="mr-2" />
+                Add Staff
+              </Link>
+            </Button>
+            <button
+              onClick={exportToExcel}
+              className="flex items-center btn-secondary"
+            >
+              <FileText size={18} className="mr-2" />
+              Export to Excel
+            </button>
+          </div>
         </div>
       </div>
       

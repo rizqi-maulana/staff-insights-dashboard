@@ -41,6 +41,7 @@ interface AppContextType {
   isLoggedIn: boolean;
   setIsLoggedIn: (value: boolean) => void;
   staffList: Staff[];
+  setStaffList: (staff: Staff[]) => void;
   attendanceData: Attendance[];
   notifications: Notification[];
   dateRange: 'day' | 'week' | 'month';
@@ -206,6 +207,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         isLoggedIn,
         setIsLoggedIn,
         staffList,
+        setStaffList,
         attendanceData,
         notifications,
         dateRange,
