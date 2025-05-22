@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 // Types for staff members
@@ -21,6 +20,12 @@ export interface Attendance {
   date: string;
   status: 'Attendance' | 'Permission' | 'No Information';
   staffName?: string;
+  from?: string;
+  until?: string;
+  proof?: string;
+  Details?: string;
+  Keterangan?: string;
+  kordinat?: string;
 }
 
 // Types for notifications
@@ -71,8 +76,8 @@ const sampleAttendance: Attendance[] = [
   { id: '1', staffId: '1', date: new Date().toISOString(), status: 'Attendance', staffName: 'John Doe' },
   { id: '2', staffId: '2', date: new Date().toISOString(), status: 'Attendance', staffName: 'Jane Smith' },
   { id: '3', staffId: '3', date: new Date().toISOString(), status: 'No Information', staffName: 'Mike Johnson' },
-  { id: '4', staffId: '4', date: new Date().toISOString(), status: 'Permission', staffName: 'Sarah Williams' },
-  { id: '5', staffId: '5', date: new Date().toISOString(), status: 'Attendance', staffName: 'David Brown' },
+  { id: '4', staffId: '4', date: new Date().toISOString(), status: 'Permission', staffName: 'Sarah Williams', from: '09:00', until: '12:00', Details: 'Doctor appointment', Keterangan: 'Medical' },
+  { id: '5', staffId: '5', date: new Date().toISOString(), status: 'Attendance', staffName: 'David Brown', Keterangan: 'Lapangan', kordinat: '-8.592085 116.0952959' },
   
   // Yesterday
   { 
@@ -80,14 +85,20 @@ const sampleAttendance: Attendance[] = [
     staffId: '1', 
     date: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), 
     status: 'Attendance',
-    staffName: 'John Doe'
+    staffName: 'John Doe',
+    Keterangan: 'Lapangan',
+    kordinat: '-8.591085 116.0942959'
   },
   { 
     id: '7', 
     staffId: '2', 
     date: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), 
     status: 'Permission',
-    staffName: 'Jane Smith' 
+    staffName: 'Jane Smith',
+    from: '13:00',
+    until: '17:00',
+    Details: 'Family emergency',
+    Keterangan: 'Personal'
   },
   
   // Two days ago

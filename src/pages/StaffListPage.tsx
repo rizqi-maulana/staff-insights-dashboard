@@ -6,6 +6,7 @@ import { useAppContext } from '../contexts/AppContext';
 import { Eye, FileText, Users, Search, UserPlus, Edit } from 'lucide-react';
 import StaffDetailModal from '../components/modals/StaffDetailModal';
 import PermissionDetailsModal from '../components/modals/PermissionDetailsModal';
+import FieldWorkDetailsModal from '../components/modals/FieldWorkDetailsModal';
 import { 
   Table, 
   TableBody, 
@@ -29,12 +30,22 @@ interface PermissionDetails {
   Keterangan: string;
 }
 
+interface FieldWorkDetails {
+  tanggal: string;
+  waktu: string;
+  keterangan: string;
+  kordinat: string;
+  status: "Hadir" | "Pulang";
+}
+
 const StaffListPage: React.FC = () => {
   const { staffList, attendanceData, exportToExcel } = useAppContext();
   const [selectedStaff, setSelectedStaff] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedPermission, setSelectedPermission] = useState<PermissionDetails | null>(null);
   const [permissionModalOpen, setPermissionModalOpen] = useState(false);
+  const [selectedFieldWork, setSelectedFieldWork] = useState<FieldWorkDetails | null>(null);
+  const [fieldWorkModalOpen, setFieldWorkModalOpen] = useState(false);
   const navigate = useNavigate();
   
   const handleViewDetails = (staffId: string) => {
@@ -81,6 +92,37 @@ const StaffListPage: React.FC = () => {
       
       setSelectedPermission(permissionDetails);
       setPermissionModalOpen(true);
+    }
+  };
+
+  const handleViewFieldWork = (staffId: string) => {
+    // Find the latest field work record for this staff member
+    const staffFieldWorks = attendanceData
+      .filter(record => record.staffId === staffId && record.Keterangan === "Lapangan")
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    
+    if (staffFieldWorks.length > 0) {
+      const latestFieldWork = staffFieldWorks[0];
+      
+      // Create field work details object
+      const fieldWorkDetails: FieldWorkDetails = {
+        tanggal: new Date().toLocaleDateString("id-ID", { 
+          weekday: 'long', 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        }),
+        waktu: new Date().toLocaleTimeString("id-ID", { 
+          hour: 'numeric', 
+          minute: 'numeric' 
+        }),
+        keterangan: "Lapangan",
+        kordinat: latestFieldWork.kordinat || "-8.592085 116.0952959",
+        status: latestFieldWork.status === "Attendance" ? "Hadir" : "Pulang"
+      };
+      
+      setSelectedFieldWork(fieldWorkDetails);
+      setFieldWorkModalOpen(true);
     }
   };
   
@@ -209,6 +251,13 @@ const StaffListPage: React.FC = () => {
         isOpen={permissionModalOpen}
         onClose={() => setPermissionModalOpen(false)}
         permission={selectedPermission}
+      />
+      
+      {/* Field Work Details Modal */}
+      <FieldWorkDetailsModal
+        isOpen={fieldWorkModalOpen}
+        onClose={() => setFieldWorkModalOpen(false)}
+        fieldWork={selectedFieldWork}
       />
       
       <MobileNav />

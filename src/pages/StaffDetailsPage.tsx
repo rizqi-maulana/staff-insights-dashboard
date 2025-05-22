@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
@@ -8,6 +7,7 @@ import { ArrowLeft, FileText, User, Calendar, Clock, AlertTriangle, Eye } from '
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import PermissionDetailsModal from '../components/modals/PermissionDetailsModal';
+import FieldWorkDetailsModal from '../components/modals/FieldWorkDetailsModal';
 
 interface PermissionDetails {
   date: string;
@@ -20,6 +20,14 @@ interface PermissionDetails {
   Keterangan: string;
 }
 
+interface FieldWorkDetails {
+  tanggal: string;
+  waktu: string;
+  keterangan: string;
+  kordinat: string;
+  status: "Hadir" | "Pulang";
+}
+
 const StaffDetailsPage: React.FC = () => {
   const { staffId } = useParams<{ staffId: string }>();
   const navigate = useNavigate();
@@ -27,6 +35,8 @@ const StaffDetailsPage: React.FC = () => {
   const [staff] = useState(() => staffList.find(s => s.id === staffId));
   const [selectedPermission, setSelectedPermission] = useState<PermissionDetails | null>(null);
   const [permissionModalOpen, setPermissionModalOpen] = useState(false);
+  const [selectedFieldWork, setSelectedFieldWork] = useState<FieldWorkDetails | null>(null);
+  const [fieldWorkModalOpen, setFieldWorkModalOpen] = useState(false);
   
   useEffect(() => {
     if (!staff) {
@@ -76,6 +86,30 @@ const StaffDetailsPage: React.FC = () => {
     
     setSelectedPermission(permissionDetails);
     setPermissionModalOpen(true);
+  };
+
+  const handleViewFieldWork = (record: any) => {
+    if (record.Keterangan === "Lapangan") {
+      // Create field work details object
+      const fieldWorkDetails: FieldWorkDetails = {
+        tanggal: new Date().toLocaleDateString("id-ID", { 
+          weekday: 'long', 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        }),
+        waktu: new Date().toLocaleTimeString("id-ID", { 
+          hour: 'numeric', 
+          minute: 'numeric'
+        }),
+        keterangan: "Lapangan",
+        kordinat: record.kordinat || "-8.592085 116.0952959",
+        status: record.status === "Attendance" ? "Hadir" : "Pulang"
+      };
+      
+      setSelectedFieldWork(fieldWorkDetails);
+      setFieldWorkModalOpen(true);
+    }
   };
 
   return (
@@ -238,16 +272,29 @@ const StaffDetailsPage: React.FC = () => {
                               </span>
                             </td>
                             <td className="py-3 px-4">
-                              <Button
-                                onClick={() => handleViewPermission(record)}
-                                variant="ghost"
-                                size="sm"
-                                className="text-primary hover:text-primary hover:bg-primary/10"
-                                disabled={record.status !== 'Permission'}
-                              >
-                                <Eye size={16} className="mr-1" />
-                                View
-                              </Button>
+                              {record.status === 'Permission' ? (
+                                <Button
+                                  onClick={() => handleViewPermission(record)}
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-primary hover:text-primary hover:bg-primary/10"
+                                >
+                                  <Eye size={16} className="mr-1" />
+                                  View
+                                </Button>
+                              ) : record.Keterangan === "Lapangan" ? (
+                                <Button
+                                  onClick={() => handleViewFieldWork(record)}
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-amber-600 hover:text-amber-600 hover:bg-amber-50"
+                                >
+                                  <Eye size={16} className="mr-1" />
+                                  Field
+                                </Button>
+                              ) : (
+                                <span className="text-gray-400 text-sm">-</span>
+                              )}
                             </td>
                           </tr>
                         ))
@@ -278,6 +325,13 @@ const StaffDetailsPage: React.FC = () => {
         isOpen={permissionModalOpen}
         onClose={() => setPermissionModalOpen(false)}
         permission={selectedPermission}
+      />
+      
+      {/* Field Work Details Modal */}
+      <FieldWorkDetailsModal
+        isOpen={fieldWorkModalOpen}
+        onClose={() => setFieldWorkModalOpen(false)}
+        fieldWork={selectedFieldWork}
       />
       
       <MobileNav />
