@@ -5,6 +5,7 @@ import MobileNav from '../components/MobileNav';
 import { useAppContext } from '../contexts/AppContext';
 import { Eye, FileText, Users, Search, UserPlus, Edit } from 'lucide-react';
 import StaffDetailModal from '../components/modals/StaffDetailModal';
+import PermissionDetailsModal from '../components/modals/PermissionDetailsModal';
 import { 
   Table, 
   TableBody, 
@@ -17,10 +18,23 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
 
+interface PermissionDetails {
+  date: string;
+  time: string;
+  from: string;
+  until: string;
+  proof: string;
+  status: string;
+  Details: string;
+  Keterangan: string;
+}
+
 const StaffListPage: React.FC = () => {
-  const { staffList, exportToExcel } = useAppContext();
+  const { staffList, attendanceData, exportToExcel } = useAppContext();
   const [selectedStaff, setSelectedStaff] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedPermission, setSelectedPermission] = useState<PermissionDetails | null>(null);
+  const [permissionModalOpen, setPermissionModalOpen] = useState(false);
   const navigate = useNavigate();
   
   const handleViewDetails = (staffId: string) => {
@@ -33,6 +47,41 @@ const StaffListPage: React.FC = () => {
 
   const handleEditStaff = (staffId: string) => {
     navigate(`/staff/edit/${staffId}`);
+  };
+
+  const handleViewPermission = (staffId: string) => {
+    // Find the latest permission for this staff member
+    const staffPermissions = attendanceData
+      .filter(record => record.staffId === staffId && record.status === 'Permission')
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    
+    if (staffPermissions.length > 0) {
+      const latestPermission = staffPermissions[0];
+      
+      // Create permission details object
+      const permissionDetails: PermissionDetails = {
+        date: new Date().toLocaleDateString("id-ID", { 
+          weekday: 'long', 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        }),
+        time: new Date().toLocaleTimeString("id-ID", { 
+          hour: 'numeric', 
+          minute: 'numeric', 
+          hour12: true 
+        }),
+        from: latestPermission.from || "N/A",
+        until: latestPermission.until || "N/A",
+        proof: latestPermission.proof || "",
+        status: "Izin",
+        Details: latestPermission.Details || "No details provided",
+        Keterangan: latestPermission.Keterangan || "General"
+      };
+      
+      setSelectedPermission(permissionDetails);
+      setPermissionModalOpen(true);
+    }
   };
   
   const filteredStaff = staffList.filter(staff => 
@@ -154,6 +203,13 @@ const StaffListPage: React.FC = () => {
           onClose={handleCloseModal}
         />
       )}
+      
+      {/* Permission Details Modal */}
+      <PermissionDetailsModal 
+        isOpen={permissionModalOpen}
+        onClose={() => setPermissionModalOpen(false)}
+        permission={selectedPermission}
+      />
       
       <MobileNav />
     </Layout>

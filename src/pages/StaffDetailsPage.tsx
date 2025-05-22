@@ -4,15 +4,29 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import MobileNav from '../components/MobileNav';
 import { useAppContext } from '../contexts/AppContext';
-import { ArrowLeft, FileText, User, Calendar, Clock, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, FileText, User, Calendar, Clock, AlertTriangle, Eye } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import PermissionDetailsModal from '../components/modals/PermissionDetailsModal';
+
+interface PermissionDetails {
+  date: string;
+  time: string;
+  from: string;
+  until: string;
+  proof: string;
+  status: string;
+  Details: string;
+  Keterangan: string;
+}
 
 const StaffDetailsPage: React.FC = () => {
   const { staffId } = useParams<{ staffId: string }>();
   const navigate = useNavigate();
   const { staffList, attendanceData, exportToExcel } = useAppContext();
   const [staff] = useState(() => staffList.find(s => s.id === staffId));
+  const [selectedPermission, setSelectedPermission] = useState<PermissionDetails | null>(null);
+  const [permissionModalOpen, setPermissionModalOpen] = useState(false);
   
   useEffect(() => {
     if (!staff) {
@@ -37,6 +51,32 @@ const StaffDetailsPage: React.FC = () => {
   const attendancePercentage = staffAttendance.length > 0 
     ? Math.round((attendanceStats.attendance / staffAttendance.length) * 100) 
     : 0;
+
+  const handleViewPermission = (record: any) => {
+    // Create permission details object
+    const permissionDetails: PermissionDetails = {
+      date: new Date().toLocaleDateString("id-ID", { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      }),
+      time: new Date().toLocaleTimeString("id-ID", { 
+        hour: 'numeric', 
+        minute: 'numeric', 
+        hour12: true 
+      }),
+      from: record.from || "N/A",
+      until: record.until || "N/A",
+      proof: record.proof || "",
+      status: "Izin",
+      Details: record.Details || "No details provided",
+      Keterangan: record.Keterangan || "General"
+    };
+    
+    setSelectedPermission(permissionDetails);
+    setPermissionModalOpen(true);
+  };
 
   return (
     <Layout>
@@ -175,6 +215,7 @@ const StaffDetailsPage: React.FC = () => {
                     <tr className="border-b">
                       <th className="py-2 px-4 text-left font-medium">Date</th>
                       <th className="py-2 px-4 text-left font-medium">Status</th>
+                      <th className="py-2 px-4 text-left font-medium">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -196,11 +237,23 @@ const StaffDetailsPage: React.FC = () => {
                                 {record.status}
                               </span>
                             </td>
+                            <td className="py-3 px-4">
+                              <Button
+                                onClick={() => handleViewPermission(record)}
+                                variant="ghost"
+                                size="sm"
+                                className="text-primary hover:text-primary hover:bg-primary/10"
+                                disabled={record.status !== 'Permission'}
+                              >
+                                <Eye size={16} className="mr-1" />
+                                View
+                              </Button>
+                            </td>
                           </tr>
                         ))
                     ) : (
                       <tr>
-                        <td colSpan={2} className="py-4 text-center text-gray-500">
+                        <td colSpan={3} className="py-4 text-center text-gray-500">
                           No attendance records found
                         </td>
                       </tr>
@@ -219,6 +272,13 @@ const StaffDetailsPage: React.FC = () => {
           </Card>
         </div>
       </div>
+      
+      {/* Permission Details Modal */}
+      <PermissionDetailsModal 
+        isOpen={permissionModalOpen}
+        onClose={() => setPermissionModalOpen(false)}
+        permission={selectedPermission}
+      />
       
       <MobileNav />
     </Layout>
