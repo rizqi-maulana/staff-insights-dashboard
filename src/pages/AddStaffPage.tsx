@@ -1,9 +1,9 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Layout from '../components/Layout';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAppContext } from '../contexts/AppContext';
-import { UserPlus } from 'lucide-react';
+import { UserPlus, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -39,14 +39,21 @@ type FormValues = z.infer<typeof formSchema>;
 
 const AddStaffPage: React.FC = () => {
   const navigate = useNavigate();
+  const { staffId } = useParams<{ staffId: string }>();
   const { staffList, setStaffList } = useAppContext();
+  const isEditing = Boolean(staffId);
+
+  // Find staff if we're editing
+  const existingStaff = isEditing 
+    ? staffList.find(staff => staff.id === staffId)
+    : undefined;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       id: "",
       name: "",
-      gender: undefined,
+      gender: "Male" as "Male" | "Female",
       email: "",
       address: "",
       position: "",
@@ -54,29 +61,63 @@ const AddStaffPage: React.FC = () => {
     },
   });
 
-  const onSubmit = (values: FormValues) => {
-    // Check if staff with this ID already exists
-    if (staffList.some(staff => staff.id === values.id)) {
-      toast.error("A staff member with this ID already exists");
-      return;
+  // Populate the form if editing existing staff
+  useEffect(() => {
+    if (existingStaff) {
+      form.reset({
+        id: existingStaff.id,
+        name: existingStaff.name,
+        gender: existingStaff.gender as "Male" | "Female",
+        email: existingStaff.email,
+        address: existingStaff.address,
+        position: existingStaff.position,
+        password: existingStaff.password,
+      });
     }
+  }, [existingStaff, form]);
 
-    const newStaff = {
-      ...values,
-      status: 'active' as const,
-    };
+  const onSubmit = (values: FormValues) => {
+    if (isEditing) {
+      // Update existing staff
+      setStaffList(
+        staffList.map(staff => 
+          staff.id === staffId 
+            ? { ...values, status: staff.status } 
+            : staff
+        )
+      );
+      toast.success("Staff updated successfully");
+    } else {
+      // Check if staff with this ID already exists
+      if (staffList.some(staff => staff.id === values.id)) {
+        toast.error("A staff member with this ID already exists");
+        return;
+      }
 
-    // Add the new staff member
-    setStaffList([...staffList, newStaff]);
-    toast.success("Staff member added successfully");
+      // Add new staff member
+      const newStaff = {
+        ...values,
+        status: 'active' as const,
+      };
+
+      setStaffList([...staffList, newStaff]);
+      toast.success("Staff member added successfully");
+    }
+    
     navigate("/staff");
   };
 
   return (
     <Layout>
       <div className="mb-6 flex items-center">
-        <UserPlus className="h-6 w-6 text-primary mr-2" />
-        <h1 className="text-2xl font-bold capitalize">Add Staff</h1>
+        {isEditing ? (
+          <User className="h-6 w-6 text-primary mr-2" />
+        ) : (
+          <UserPlus className="h-6 w-6 text-primary mr-2" />
+        )}
+        <h1 className="text-2xl font-bold capitalize">
+          {isEditing ? "Update Staff" : "Add Staff"}
+        </h1>
       </div>
 
       <Card className="max-w-2xl mx-auto">
@@ -94,7 +135,11 @@ const AddStaffPage: React.FC = () => {
                     <FormItem>
                       <FormLabel className="capitalize">ID</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter staff ID" {...field} />
+                        <Input 
+                          placeholder="Enter staff ID" 
+                          {...field} 
+                          disabled={isEditing} 
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -124,7 +169,7 @@ const AddStaffPage: React.FC = () => {
                       <FormControl>
                         <RadioGroup
                           onValueChange={field.onChange}
-                          defaultValue={field.value}
+                          value={field.value}
                           className="flex space-x-4"
                         >
                           <div className="flex items-center space-x-2">
@@ -207,7 +252,9 @@ const AddStaffPage: React.FC = () => {
                 <Button variant="outline" type="button" onClick={() => navigate("/staff")}>
                   Cancel
                 </Button>
-                <Button type="submit">Save Staff</Button>
+                <Button type="submit">
+                  {isEditing ? "Update Staff" : "Save Staff"}
+                </Button>
               </div>
             </form>
           </Form>

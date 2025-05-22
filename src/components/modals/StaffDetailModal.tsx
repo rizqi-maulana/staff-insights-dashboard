@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { X, CheckCircle, AlertCircle, RefreshCw, Trash2, User } from 'lucide-react';
+import { X, CheckCircle, AlertCircle, RefreshCw, Trash2, User, Edit } from 'lucide-react';
 import { Staff, useAppContext } from '../../contexts/AppContext';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -45,6 +45,11 @@ const StaffDetailModal: React.FC<StaffDetailModalProps> = ({ staff, onClose }) =
 
   const handleViewDetails = () => {
     navigate(`/staff/${staff.id}`);
+    onClose();
+  };
+
+  const handleEditStaff = () => {
+    navigate(`/staff/edit/${staff.id}`);
     onClose();
   };
 
@@ -106,6 +111,14 @@ const StaffDetailModal: React.FC<StaffDetailModalProps> = ({ staff, onClose }) =
             >
               <User size={18} className="mr-2" />
               View Full Details
+            </button>
+
+            <button
+              onClick={handleEditStaff}
+              className="flex items-center bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors"
+            >
+              <Edit size={18} className="mr-2" />
+              Edit Staff
             </button>
             
             <button

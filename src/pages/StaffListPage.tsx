@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import Layout from '../components/Layout';
 import MobileNav from '../components/MobileNav';
 import { useAppContext } from '../contexts/AppContext';
-import { Eye, FileText, Users, Search, UserPlus } from 'lucide-react';
+import { Eye, FileText, Users, Search, UserPlus, Edit } from 'lucide-react';
 import StaffDetailModal from '../components/modals/StaffDetailModal';
 import { 
   Table, 
@@ -15,12 +15,13 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const StaffListPage: React.FC = () => {
   const { staffList, exportToExcel } = useAppContext();
   const [selectedStaff, setSelectedStaff] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const navigate = useNavigate();
   
   const handleViewDetails = (staffId: string) => {
     setSelectedStaff(staffId);
@@ -28,6 +29,10 @@ const StaffListPage: React.FC = () => {
   
   const handleCloseModal = () => {
     setSelectedStaff(null);
+  };
+
+  const handleEditStaff = (staffId: string) => {
+    navigate(`/staff/edit/${staffId}`);
   };
   
   const filteredStaff = staffList.filter(staff => 
@@ -87,7 +92,7 @@ const StaffListPage: React.FC = () => {
                 <TableHead>Gender</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead className="w-[100px]">Action</TableHead>
+                <TableHead className="w-[160px]">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -108,15 +113,26 @@ const StaffListPage: React.FC = () => {
                     </span>
                   </TableCell>
                   <TableCell>
-                    <Button
-                      onClick={() => handleViewDetails(staff.id)}
-                      variant="ghost"
-                      size="sm"
-                      className="flex items-center text-primary hover:text-primary hover:bg-primary/10"
-                    >
-                      <Eye size={16} className="mr-1" />
-                      Details
-                    </Button>
+                    <div className="flex space-x-2">
+                      <Button
+                        onClick={() => handleViewDetails(staff.id)}
+                        variant="ghost"
+                        size="sm"
+                        className="text-primary hover:text-primary hover:bg-primary/10"
+                      >
+                        <Eye size={16} className="mr-1" />
+                        View
+                      </Button>
+                      <Button
+                        onClick={() => handleEditStaff(staff.id)}
+                        variant="ghost"
+                        size="sm"
+                        className="text-blue-600 hover:text-blue-600 hover:bg-blue-50"
+                      >
+                        <Edit size={16} className="mr-1" />
+                        Edit
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
