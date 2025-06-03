@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import Layout from '../components/Layout';
 import MobileNav from '../components/MobileNav';
 import { useAppContext } from '../contexts/AppContext';
-import { Eye, FileText, Users, Search, UserPlus, Edit } from 'lucide-react';
+import { Eye, FileText, Users, Search, UserPlus, Edit, Filter } from 'lucide-react';
 import StaffDetailModal from '../components/modals/StaffDetailModal';
 import PermissionDetailsModal from '../components/modals/PermissionDetailsModal';
 import FieldWorkDetailsModal from '../components/modals/FieldWorkDetailsModal';
@@ -17,6 +16,14 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Link, useNavigate } from 'react-router-dom';
 
 interface PermissionDetails {
@@ -38,6 +45,12 @@ interface FieldWorkDetails {
   status: "Hadir" | "Pulang";
 }
 
+interface FilterState {
+  status: string;
+  position: string;
+  gender: string;
+}
+
 const StaffListPage: React.FC = () => {
   const { staffList, attendanceData, exportToExcel } = useAppContext();
   const [selectedStaff, setSelectedStaff] = useState<string | null>(null);
@@ -46,6 +59,11 @@ const StaffListPage: React.FC = () => {
   const [permissionModalOpen, setPermissionModalOpen] = useState(false);
   const [selectedFieldWork, setSelectedFieldWork] = useState<FieldWorkDetails | null>(null);
   const [fieldWorkModalOpen, setFieldWorkModalOpen] = useState(false);
+  const [filters, setFilters] = useState<FilterState>({
+    status: 'all',
+    position: 'all',
+    gender: 'all'
+  });
   const navigate = useNavigate();
   
   const handleViewDetails = (staffId: string) => {
@@ -125,12 +143,36 @@ const StaffListPage: React.FC = () => {
       setFieldWorkModalOpen(true);
     }
   };
+
+  const handleFilterChange = (filterType: keyof FilterState, value: string) => {
+    setFilters(prev => ({
+      ...prev,
+      [filterType]: value
+    }));
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      status: 'all',
+      position: 'all',
+      gender: 'all'
+    });
+  };
   
-  const filteredStaff = staffList.filter(staff => 
-    staff.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    staff.position.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    staff.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredStaff = staffList.filter(staff => {
+    const matchesSearch = staff.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      staff.position.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      staff.email.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesStatus = filters.status === 'all' || staff.status === filters.status;
+    const matchesPosition = filters.position === 'all' || staff.position === filters.position;
+    const matchesGender = filters.gender === 'all' || staff.gender === filters.gender;
+    
+    return matchesSearch && matchesStatus && matchesPosition && matchesGender;
+  });
+
+  // Get unique positions for filter dropdown
+  const uniquePositions = [...new Set(staffList.map(staff => staff.position))];
   
   return (
     <Layout>
@@ -152,6 +194,60 @@ const StaffListPage: React.FC = () => {
             />
           </div>
           <div className="flex gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="flex items-center">
+                  <Filter size={18} className="mr-2" />
+                  Filter
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56">
+                <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => handleFilterChange('status', 'all')}>
+                  All Status
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleFilterChange('status', 'active')}>
+                  Active
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleFilterChange('status', 'inactive')}>
+                  Inactive
+                </DropdownMenuItem>
+                
+                <DropdownMenuSeparator />
+                
+                <DropdownMenuLabel>Filter by Position</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => handleFilterChange('position', 'all')}>
+                  All Positions
+                </DropdownMenuItem>
+                {uniquePositions.map(position => (
+                  <DropdownMenuItem 
+                    key={position} 
+                    onClick={() => handleFilterChange('position', position)}
+                  >
+                    {position}
+                  </DropdownMenuItem>
+                ))}
+                
+                <DropdownMenuSeparator />
+                
+                <DropdownMenuLabel>Filter by Gender</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => handleFilterChange('gender', 'all')}>
+                  All Genders
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleFilterChange('gender', 'Male')}>
+                  Male
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleFilterChange('gender', 'Female')}>
+                  Female
+                </DropdownMenuItem>
+                
+                <DropdownMenuSeparator />
+                
+                <DropdownMenuItem onClick={clearFilters}>
+                  Clear All Filters
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button asChild variant="default">
               <Link to="/staff/add" className="flex items-center">
                 <UserPlus size={18} className="mr-2" />
