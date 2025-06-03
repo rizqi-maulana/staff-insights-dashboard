@@ -1,14 +1,16 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import Layout from '../components/Layout';
 import MobileNav from '../components/MobileNav';
 import { useAppContext } from '../contexts/AppContext';
 import AttendanceBarChart from '../components/charts/AttendanceBarChart';
 import RoleDonutChart from '../components/charts/RoleDonutChart';
 import AttendanceLineChart from '../components/charts/AttendanceLineChart';
+import TodayAttendanceModal from '../components/modals/TodayAttendanceModal';
 
 const DashboardPage: React.FC = () => {
   const { dateRange, setDateRange, attendanceData, staffList } = useAppContext();
+  const [isTodayAttendanceModalOpen, setIsTodayAttendanceModalOpen] = useState(false);
   
   return (
     <Layout>
@@ -67,7 +69,10 @@ const DashboardPage: React.FC = () => {
           </div>
         </div>
         
-        <div className="card-container">
+        <div 
+          className="card-container cursor-pointer hover:shadow-md transition-shadow"
+          onClick={() => setIsTodayAttendanceModalOpen(true)}
+        >
           <h2 className="text-lg font-semibold">Today's Attendance</h2>
           <p className="text-3xl font-bold mt-2">
             {attendanceData.filter(a => {
@@ -108,6 +113,7 @@ const DashboardPage: React.FC = () => {
               </p>
             </div>
           </div>
+          <p className="text-xs text-gray-400 mt-2">Click to view details</p>
         </div>
         
         <div className="card-container md:col-span-2 lg:col-span-1">
@@ -158,6 +164,11 @@ const DashboardPage: React.FC = () => {
       <div className="mt-6">
         <RoleDonutChart data={staffList} />
       </div>
+      
+      <TodayAttendanceModal
+        isOpen={isTodayAttendanceModalOpen}
+        onClose={() => setIsTodayAttendanceModalOpen(false)}
+      />
       
       <MobileNav />
     </Layout>
