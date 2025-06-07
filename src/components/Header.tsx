@@ -1,12 +1,12 @@
 
 import React, { useState } from 'react';
-import { Bell, LogOut, RefreshCw } from 'lucide-react';
+import { Bell, LogOut } from 'lucide-react';
 import { useAppContext } from '../contexts/AppContext';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 
 const Header: React.FC = () => {
-  const { logout, notifications, resetServerName } = useAppContext();
+  const { logout, notifications } = useAppContext();
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
@@ -16,15 +16,6 @@ const Header: React.FC = () => {
       </div>
       
       <div className="flex items-center space-x-4">
-        <button 
-          onClick={resetServerName}
-          className="flex items-center text-white hover:text-accent transition-colors"
-          title="Reset Server Name"
-        >
-          <RefreshCw size={20} />
-          <span className="ml-1 hidden md:inline">Reset Server</span>
-        </button>
-
         <Link to="/notifications" className="relative">
           <Bell size={20} className="text-white hover:text-accent transition-colors" />
           {unreadCount > 0 && (

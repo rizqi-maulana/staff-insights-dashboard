@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAppContext, Staff } from '../contexts/AppContext';
@@ -12,7 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "@/hooks/use-toast"
 
 const AddStaffPage: React.FC = () => {
   const { staffList, setStaffList } = useAppContext();
@@ -56,11 +57,10 @@ const AddStaffPage: React.FC = () => {
     e.preventDefault();
     if (isEditing) {
       // Update existing staff
-      setStaffList(prev =>
-        prev.map(staff =>
-          staff.id === formData.id ? formData : staff
-        )
+      const updatedStaffList = staffList.map(staff =>
+        staff.id === formData.id ? formData : staff
       );
+      setStaffList(updatedStaffList);
       toast({
         title: "Success!",
         description: "Staff updated successfully.",
@@ -68,7 +68,8 @@ const AddStaffPage: React.FC = () => {
     } else {
       // Add new staff
       const newStaff = { ...formData, id: Date.now().toString() };
-      setStaffList(prev => [...prev, newStaff]);
+      const updatedStaffList = [...staffList, newStaff];
+      setStaffList(updatedStaffList);
       toast({
         title: "Success!",
         description: "Staff added successfully.",
