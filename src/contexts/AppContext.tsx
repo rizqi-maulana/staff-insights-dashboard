@@ -58,6 +58,11 @@ interface AppContextType {
   deleteStaff: (id: string) => void;
   resetServerName: () => void;
   exportToExcel: () => void;
+  activateAllStaff: () => void;
+  deactivateAllStaff: () => void;
+  resetAllDevices: () => void;
+  refreshAllQRCodes: () => void;
+  deleteAllStaff: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -210,6 +215,35 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     // In a real application, this would generate and download an Excel file
   };
 
+  const activateAllStaff = () => {
+    setStaffList(prevStaff => 
+      prevStaff.map(staff => ({ ...staff, status: 'active' }))
+    );
+    console.log('All staff accounts activated');
+  };
+
+  const deactivateAllStaff = () => {
+    setStaffList(prevStaff => 
+      prevStaff.map(staff => ({ ...staff, status: 'inactive' }))
+    );
+    console.log('All staff accounts deactivated');
+  };
+
+  const resetAllDevices = () => {
+    console.log('All device accounts reset');
+    // In a real application, this would trigger a mass device reset API call
+  };
+
+  const refreshAllQRCodes = () => {
+    console.log('All QR codes refreshed');
+    // In a real application, this would regenerate QR codes for all staff
+  };
+
+  const deleteAllStaff = () => {
+    setStaffList([]);
+    console.log('All staff accounts deleted');
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -229,7 +263,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         resetDevice,
         deleteStaff,
         resetServerName,
-        exportToExcel
+        exportToExcel,
+        activateAllStaff,
+        deactivateAllStaff,
+        resetAllDevices,
+        refreshAllQRCodes,
+        deleteAllStaff
       }}
     >
       {children}
