@@ -1,253 +1,126 @@
-
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useAppContext, Staff } from '../contexts/AppContext';
 import Layout from '../components/Layout';
-import MobileNav from '../components/MobileNav';
-import { useAppContext } from '../contexts/AppContext';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { UserPlus, Save } from 'lucide-react';
-
-type Staff = {
-  id: string;
-  name: string;
-  position: string;
-  gender: "Male" | "Female";
-  email: string;
-  password: string;
-  address: string;
-  status: "active" | "inactive";
-  photo?: string;
-};
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { toast } from "@/components/ui/use-toast"
 
 const AddStaffPage: React.FC = () => {
-  const { staffId } = useParams<{ staffId: string }>();
-  const isEditMode = Boolean(staffId);
   const { staffList, setStaffList } = useAppContext();
-  const { toast } = useToast();
+  const { staffId } = useParams<{ staffId: string }>();
   const navigate = useNavigate();
-  
+  const [isEditing, setIsEditing] = useState(false);
+
   const [formData, setFormData] = useState<Staff>({
     id: '',
     name: '',
-    position: 'Staff',
-    gender: "Male",
+    position: '',
+    gender: 'Male',
     email: '',
-    password: '',
+    status: 'active',
     address: '',
-    status: 'active'
+    password: ''
   });
-  
+
   useEffect(() => {
-    if (isEditMode && staffId) {
-      const staffToEdit = staffList.find(staff => staff.id === staffId);
-      if (staffToEdit) {
-        setFormData(staffToEdit);
-      } else {
-        navigate('/staff');
-        toast({
-          title: "Staff Not Found",
-          description: "The staff member you're trying to edit doesn't exist.",
-          variant: "destructive",
+    if (staffId && staffId !== 'add') {
+      const staff = staffList.find(s => s.id === staffId);
+      if (staff) {
+        setFormData({
+          ...staff,
+          gender: staff.gender as 'Male' | 'Female'
         });
+        setIsEditing(true);
       }
     }
-  }, [isEditMode, staffId, staffList, navigate, toast]);
-  
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  }, [staffId, staffList]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
-  
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.id || !formData.name || !formData.email || !formData.password) {
-      toast({
-        title: "Missing Fields",
-        description: "Please fill all required fields.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (isEditMode) {
+    if (isEditing) {
       // Update existing staff
-      const updatedStaffList = staffList.map(staff => 
-        staff.id === staffId ? formData : staff
+      setStaffList(prev =>
+        prev.map(staff =>
+          staff.id === formData.id ? formData : staff
+        )
       );
-      
-      setStaffList(updatedStaffList as Staff[]);
-      
       toast({
-        title: "Staff Updated",
-        description: `${formData.name}'s information has been updated.`,
-      });
+        title: "Success!",
+        description: "Staff updated successfully.",
+      })
     } else {
-      // Check if ID already exists
-      if (staffList.some(staff => staff.id === formData.id)) {
-        toast({
-          title: "ID Already Exists",
-          description: "Please use a different ID.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
       // Add new staff
-      setStaffList([...staffList, formData]);
-      
+      const newStaff = { ...formData, id: Date.now().toString() };
+      setStaffList(prev => [...prev, newStaff]);
       toast({
-        title: "Staff Added",
-        description: `${formData.name} has been added to the system.`,
-      });
+        title: "Success!",
+        description: "Staff added successfully.",
+      })
     }
-    
     navigate('/staff');
   };
-  
+
   return (
     <Layout>
-      <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
-        <div className="flex items-center">
-          <UserPlus className="h-6 w-6 text-primary mr-2" />
-          <h1 className="text-2xl font-bold">{isEditMode ? 'Edit Staff' : 'Add Staff'}</h1>
-        </div>
-      </div>
-      
-      <Card>
-        <CardHeader className="border-b bg-muted/40">
-          <CardTitle>{isEditMode ? 'Update Staff Information' : 'Staff Information'}</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="form-group">
-                <label htmlFor="id" className="block text-sm font-medium text-gray-700 mb-1">
-                  Staff ID <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="id"
-                  name="id"
-                  value={formData.id}
-                  onChange={handleInputChange}
-                  disabled={isEditMode}
-                  className={`input-field ${isEditMode ? 'bg-gray-100' : ''}`}
-                  required
-                />
+      <div className="container py-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>{isEditing ? 'Edit Staff' : 'Add Staff'}</CardTitle>
+            <CardDescription>
+              {isEditing ? 'Edit an existing staff member.' : 'Add a new staff member to the system.'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <Label htmlFor="name">Name</Label>
+                <Input type="text" id="name" name="name" value={formData.name} onChange={handleChange} required />
               </div>
-              
-              <div className="form-group">
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                  Full Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className="input-field"
-                  required
-                />
+              <div>
+                <Label htmlFor="position">Position</Label>
+                <Input type="text" id="position" name="position" value={formData.position} onChange={handleChange} required />
               </div>
-              
-              <div className="form-group">
-                <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-1">
-                  Gender <span className="text-red-500">*</span>
-                </label>
-                <select
-                  id="gender"
-                  name="gender"
-                  value={formData.gender}
-                  onChange={handleInputChange}
-                  className="input-field"
-                  required
-                >
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required />
+              </div>
+              <div>
+                <Label htmlFor="password">Password</Label>
+                <Input type="password" id="password" name="password" value={formData.password} onChange={handleChange} required />
+              </div>
+              <div>
+                <Label htmlFor="gender">Gender</Label>
+                <select id="gender" name="gender" value={formData.gender} onChange={handleChange} className="w-full p-2 border rounded">
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
                 </select>
               </div>
-              
-              <div className="form-group">
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                  Email <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="input-field"
-                  required
-                />
+              <div>
+                <Label htmlFor="address">Address</Label>
+                <Input type="text" id="address" name="address" value={formData.address} onChange={handleChange} required />
               </div>
-              
-              <div className="form-group">
-                <label htmlFor="position" className="block text-sm font-medium text-gray-700 mb-1">
-                  Position
-                </label>
-                <input
-                  type="text"
-                  id="position"
-                  name="position"
-                  value={formData.position}
-                  onChange={handleInputChange}
-                  className="input-field"
-                />
-              </div>
-              
-              <div className="form-group">
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                  Password <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  className="input-field"
-                  required
-                />
-              </div>
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
-                Address
-              </label>
-              <textarea
-                id="address"
-                name="address"
-                value={formData.address}
-                onChange={handleInputChange}
-                className="input-field min-h-[100px]"
-                rows={3}
-              />
-            </div>
-            
-            <div className="flex justify-end space-x-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate('/staff')}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" className="gap-2">
-                <Save size={18} />
-                {isEditMode ? 'Update Staff' : 'Save Staff'}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-      
-      <MobileNav />
+              <Button type="submit">{isEditing ? 'Update Staff' : 'Add Staff'}</Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </Layout>
   );
 };
