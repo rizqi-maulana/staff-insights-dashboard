@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { useAppContext } from '../contexts/AppContext';
 import Layout from '../components/Layout';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, UserCheck, UserX, RotateCcw, QrCode, Trash2, Power } from 'lucide-react';
+import { Users, UserCheck, UserX, RotateCcw, QrCode, Trash2 } from 'lucide-react';
 
 const StaffManagementPage: React.FC = () => {
   const { 
@@ -14,8 +13,7 @@ const StaffManagementPage: React.FC = () => {
     deactivateAllStaff, 
     resetAllDevices, 
     refreshAllQRCodes, 
-    deleteAllStaff,
-    resetServerName 
+    deleteAllStaff
   } = useAppContext();
 
   const activeStaffCount = staffList.filter(staff => staff.status === 'active').length;
@@ -40,12 +38,6 @@ const StaffManagementPage: React.FC = () => {
   const handleDeleteAll = () => {
     if (window.confirm('Are you sure you want to delete all staff accounts? This action cannot be undone.')) {
       deleteAllStaff();
-    }
-  };
-
-  const handleResetServer = () => {
-    if (window.confirm('Are you sure you want to reset the server and logout? You will be redirected to the home page.')) {
-      resetServerName();
     }
   };
 
@@ -161,15 +153,6 @@ const StaffManagementPage: React.FC = () => {
               >
                 <QrCode className="mr-2 h-4 w-4" />
                 Refresh All QR Codes
-              </Button>
-
-              <Button 
-                onClick={handleResetServer} 
-                variant="outline"
-                className="w-full border-yellow-300 text-yellow-700 hover:bg-yellow-50"
-              >
-                <Power className="mr-2 h-4 w-4" />
-                Reset Server & Logout
               </Button>
             </CardContent>
           </Card>

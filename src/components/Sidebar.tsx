@@ -1,10 +1,18 @@
 
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { BarChart3, Users, Bell, Home, UserPlus, Settings } from 'lucide-react';
+import { BarChart3, Users, Bell, Home, UserPlus, Settings, Power } from 'lucide-react';
 import { useAppContext } from '../contexts/AppContext';
 
 const Sidebar: React.FC = () => {
+  const { resetServerName } = useAppContext();
+
+  const handleResetServer = () => {
+    if (window.confirm('Are you sure you want to reset the server and logout? You will be redirected to the home page.')) {
+      resetServerName();
+    }
+  };
+
   return (
     <nav className="bg-primary text-white w-64 min-h-screen p-4 hidden md:block">
       <div className="mb-8">
@@ -17,6 +25,18 @@ const Sidebar: React.FC = () => {
         <NavItem to="/staff/add" icon={<UserPlus size={20} />} label="Add Staff" />
         <NavItem to="/staff-management" icon={<Settings size={20} />} label="Staff Management" />
         <NavItem to="/notifications" icon={<Bell size={20} />} label="Notifications" />
+      </div>
+
+      {/* System Category */}
+      <div className="mt-8 pt-4 border-t border-white/20">
+        <h3 className="text-sm font-medium text-white/70 mb-2 px-3">System</h3>
+        <button
+          onClick={handleResetServer}
+          className="flex items-center p-3 rounded-lg transition-all w-full text-left hover:bg-red-600/20 text-red-300 hover:text-red-200"
+        >
+          <span className="mr-3"><Power size={20} /></span>
+          <span>Reset Server & Logout</span>
+        </button>
       </div>
     </nav>
   );
