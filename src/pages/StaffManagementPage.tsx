@@ -1,10 +1,12 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { useAppContext } from '../contexts/AppContext';
 import Layout from '../components/Layout';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, UserCheck, UserX, RotateCcw, QrCode, Trash2 } from 'lucide-react';
+import { Users, UserCheck, UserX, RotateCcw, QrCode, Trash2, Mail } from 'lucide-react';
+import SendLoginInfoModal from '../components/modals/SendLoginInfoModal';
 
 const StaffManagementPage: React.FC = () => {
   const { 
@@ -15,6 +17,8 @@ const StaffManagementPage: React.FC = () => {
     refreshAllQRCodes, 
     deleteAllStaff
   } = useAppContext();
+
+  const [showSendLoginModal, setShowSendLoginModal] = useState(false);
 
   const activeStaffCount = staffList.filter(staff => staff.status === 'active').length;
   const inactiveStaffCount = staffList.filter(staff => staff.status === 'inactive').length;
@@ -123,6 +127,32 @@ const StaffManagementPage: React.FC = () => {
             </CardContent>
           </Card>
 
+          {/* Communication */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Mail className="h-5 w-5" />
+                Communication
+              </CardTitle>
+              <CardDescription>
+                Send login information and notifications to staff
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button 
+                onClick={() => setShowSendLoginModal(true)} 
+                className="w-full bg-blue-600 hover:bg-blue-700"
+                disabled={staffList.length === 0}
+              >
+                <Mail className="mr-2 h-4 w-4" />
+                Send Login Information
+                <Badge variant="secondary" className="ml-2">
+                  {staffList.length}
+                </Badge>
+              </Button>
+            </CardContent>
+          </Card>
+
           {/* Device & System Management */}
           <Card>
             <CardHeader>
@@ -158,7 +188,7 @@ const StaffManagementPage: React.FC = () => {
           </Card>
 
           {/* Danger Zone */}
-          <Card className="md:col-span-2">
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-red-600">
                 <Trash2 className="h-5 w-5" />
@@ -188,6 +218,11 @@ const StaffManagementPage: React.FC = () => {
           </Card>
         </div>
       </div>
+
+      <SendLoginInfoModal 
+        isOpen={showSendLoginModal}
+        onClose={() => setShowSendLoginModal(false)}
+      />
     </Layout>
   );
 };
