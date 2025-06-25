@@ -11,6 +11,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { useAppContext } from '../../contexts/AppContext';
 import { useToast } from '@/hooks/use-toast';
 import { Mail, User, Send } from 'lucide-react';
@@ -107,88 +109,96 @@ const SendLoginInfoModal: React.FC<SendLoginInfoModalProps> = ({ isOpen, onClose
         
         <form onSubmit={handleSendLoginInfo} className="space-y-6">
           {/* Staff Selection */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <label className="text-sm font-medium text-gray-700">
-                Select Staff Members
-              </label>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleSelectAll}
-              >
-                {selectedStaff.length === staffList.length ? 'Deselect All' : 'Select All'}
-              </Button>
-            </div>
-            
-            <div className="max-h-60 overflow-y-auto border rounded-lg p-3 space-y-2">
-              {staffList.map(staff => (
-                <div
-                  key={staff.id}
-                  className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${
-                    selectedStaff.includes(staff.id)
-                      ? 'bg-blue-50 border-blue-300'
-                      : 'hover:bg-gray-50'
-                  }`}
-                  onClick={() => handleStaffToggle(staff.id)}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between mb-4">
+                <Label className="text-base font-medium">
+                  Select Staff Members
+                </Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSelectAll}
                 >
-                  <div className="flex items-center gap-3">
-                    <User className="h-4 w-4" />
-                    <div>
-                      <p className="font-medium">{staff.name}</p>
-                      <p className="text-sm text-gray-500">{staff.email}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={staff.status === 'active' ? 'default' : 'secondary'}>
-                      {staff.status}
-                    </Badge>
-                    {selectedStaff.includes(staff.id) && (
-                      <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
-                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                  {selectedStaff.length === staffList.length ? 'Deselect All' : 'Select All'}
+                </Button>
+              </div>
+              
+              <div className="max-h-60 overflow-y-auto space-y-2">
+                {staffList.map(staff => (
+                  <Card
+                    key={staff.id}
+                    className={`cursor-pointer transition-colors ${
+                      selectedStaff.includes(staff.id)
+                        ? 'bg-blue-50 border-blue-300'
+                        : 'hover:bg-gray-50'
+                    }`}
+                    onClick={() => handleStaffToggle(staff.id)}
+                  >
+                    <CardContent className="flex items-center justify-between p-3">
+                      <div className="flex items-center gap-3">
+                        <User className="h-4 w-4" />
+                        <div>
+                          <p className="font-medium">{staff.name}</p>
+                          <p className="text-sm text-gray-500">{staff.email}</p>
+                        </div>
                       </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            {selectedStaff.length > 0 && (
-              <p className="text-sm text-gray-600 mt-2">
-                {selectedStaff.length} staff member(s) selected
-              </p>
-            )}
-          </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={staff.status === 'active' ? 'default' : 'secondary'}>
+                          {staff.status}
+                        </Badge>
+                        {selectedStaff.includes(staff.id) && (
+                          <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                            <div className="w-2 h-2 bg-white rounded-full"></div>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              
+              {selectedStaff.length > 0 && (
+                <p className="text-sm text-gray-600 mt-3">
+                  {selectedStaff.length} staff member(s) selected
+                </p>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Custom Message */}
-          <div>
-            <label htmlFor="customMessage" className="block text-sm font-medium text-gray-700 mb-1">
-              Custom Message (Optional)
-            </label>
-            <Input
-              id="customMessage"
-              type="text"
-              value={customMessage}
-              onChange={(e) => setCustomMessage(e.target.value)}
-              placeholder="Add a custom message to include in the email..."
-              className="w-full"
-            />
-          </div>
+          <Card>
+            <CardContent className="pt-6">
+              <Label htmlFor="customMessage" className="text-base font-medium">
+                Custom Message (Optional)
+              </Label>
+              <Input
+                id="customMessage"
+                type="text"
+                value={customMessage}
+                onChange={(e) => setCustomMessage(e.target.value)}
+                placeholder="Add a custom message to include in the email..."
+                className="mt-2"
+              />
+            </CardContent>
+          </Card>
 
           {/* Email Preview */}
           {selectedStaff.length > 0 && (
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="text-sm font-medium mb-2">Email Preview:</h4>
-              <div className="text-sm text-gray-700 space-y-1">
-                <p><strong>Subject:</strong> Your Login Credentials - Staff Management System</p>
-                <p><strong>Recipients:</strong> {selectedStaff.length} staff member(s)</p>
-                {customMessage && <p><strong>Custom Message:</strong> {customMessage}</p>}
-                <p className="text-xs text-gray-500 mt-2">
-                  * Each staff member will receive their individual login credentials
-                </p>
-              </div>
-            </div>
+            <Card className="bg-gray-50">
+              <CardContent className="pt-6">
+                <h4 className="text-base font-medium mb-3">Email Preview:</h4>
+                <div className="text-sm text-gray-700 space-y-2">
+                  <p><strong>Subject:</strong> Your Login Credentials - Staff Management System</p>
+                  <p><strong>Recipients:</strong> {selectedStaff.length} staff member(s)</p>
+                  {customMessage && <p><strong>Custom Message:</strong> {customMessage}</p>}
+                  <p className="text-xs text-gray-500 mt-3">
+                    * Each staff member will receive their individual login credentials
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           )}
           
           <DialogFooter>
