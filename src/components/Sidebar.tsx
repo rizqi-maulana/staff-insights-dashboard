@@ -24,6 +24,7 @@ const Sidebar: React.FC = () => {
         <NavItem to="/staff" icon={<Users size={20} />} label="Staff List" />
         <NavItem to="/staff/add" icon={<UserPlus size={20} />} label="Add Staff" />
         <NavItem to="/staff-management" icon={<Settings size={20} />} label="Staff Management" />
+        <NavItem to="/settings" icon={<Settings size={20} />} label="Settings" />
         <NavItem to="/notifications" icon={<Bell size={20} />} label="Notifications" />
       </div>
 

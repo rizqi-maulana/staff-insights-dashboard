@@ -10,6 +10,7 @@ import DashboardPage from "./pages/DashboardPage";
 import StaffListPage from "./pages/StaffListPage";
 import AddStaffPage from "./pages/AddStaffPage";
 import StaffManagementPage from "./pages/StaffManagementPage";
+import SettingsPage from "./pages/SettingsPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import StaffDetailsPage from "./pages/StaffDetailsPage";
 import NotFound from "./pages/NotFound";
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/staff/edit/:staffId" element={<AddStaffPage />} />
             <Route path="/staff/:staffId" element={<StaffDetailsPage />} />
             <Route path="/staff-management" element={<StaffManagementPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
