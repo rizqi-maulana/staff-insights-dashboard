@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from '../components/Layout';
 import MobileNav from '../components/MobileNav';
@@ -7,17 +6,42 @@ import AttendanceBarChart from '../components/charts/AttendanceBarChart';
 import RoleDonutChart from '../components/charts/RoleDonutChart';
 import AttendanceLineChart from '../components/charts/AttendanceLineChart';
 import TodayAttendanceModal from '../components/modals/TodayAttendanceModal';
+import { Switch } from '../components/ui/switch';
+import { Label } from '../components/ui/label';
+import { ScanQrCode } from 'lucide-react';
 
 const DashboardPage: React.FC = () => {
   const { dateRange, setDateRange, attendanceData, staffList } = useAppContext();
   const [isTodayAttendanceModalOpen, setIsTodayAttendanceModalOpen] = useState(false);
+  const [isScannerActive, setIsScannerActive] = useState(false);
   
   return (
     <Layout>
       <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
         <h1 className="text-2xl font-bold">Dashboard</h1>
         
-        <div className="mt-4 md:mt-0">
+        <div className="mt-4 md:mt-0 flex flex-col md:flex-row md:items-center gap-4">
+          {/* Scanner Toggle */}
+          <div className="flex items-center space-x-3 bg-white p-3 rounded-lg border shadow-sm">
+            <ScanQrCode className={`h-5 w-5 ${isScannerActive ? 'text-green-600' : 'text-gray-400'}`} />
+            <Label htmlFor="scanner-toggle" className="text-sm font-medium">
+              QR Scanner
+            </Label>
+            <Switch
+              id="scanner-toggle"
+              checked={isScannerActive}
+              onCheckedChange={setIsScannerActive}
+            />
+            <span className={`text-xs px-2 py-1 rounded-full ${
+              isScannerActive 
+                ? 'bg-green-100 text-green-700' 
+                : 'bg-gray-100 text-gray-500'
+            }`}>
+              {isScannerActive ? 'Active' : 'Inactive'}
+            </span>
+          </div>
+          
+          {/* Date Range Buttons */}
           <div className="inline-flex rounded-md shadow-sm">
             <button
               onClick={() => setDateRange('day')}
@@ -52,6 +76,19 @@ const DashboardPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Scanner Status Banner */}
+      {isScannerActive && (
+        <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
+          <div className="flex items-center">
+            <ScanQrCode className="h-5 w-5 text-green-600 mr-3" />
+            <div>
+              <p className="text-green-800 font-medium">QR Scanner is Active</p>
+              <p className="text-green-600 text-sm">Ready to scan QR codes for attendance tracking</p>
+            </div>
+          </div>
+        </div>
+      )}
       
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         <div className="card-container">
