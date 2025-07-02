@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Switch } from '../components/ui/switch';
 import { Label } from '../components/ui/label';
 import { Button } from "@/components/ui/button";
-import { ScanQrCode, Settings, Monitor, Bell, Palette, Database } from 'lucide-react';
+import { ScanQrCode, Settings, Monitor, Bell, Palette, Database, Lock } from 'lucide-react';
 
 const SettingsPage: React.FC = () => {
   const [isScannerActive, setIsScannerActive] = useState(false);
@@ -46,11 +46,12 @@ const SettingsPage: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Scanner Settings */}
-          <Card>
+          <Card className={!isScannerActive ? 'opacity-75 border-gray-300' : ''}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <ScanQrCode className="h-5 w-5" />
                 QR Scanner Settings
+                {!isScannerActive && <Lock className="h-4 w-4 text-gray-400" />}
               </CardTitle>
               <CardDescription>
                 Configure QR code scanner for attendance tracking
@@ -70,12 +71,22 @@ const SettingsPage: React.FC = () => {
                 />
               </div>
               
-              {isScannerActive && (
+              {isScannerActive ? (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                   <div className="flex items-center">
                     <ScanQrCode className="h-4 w-4 text-green-600 mr-2" />
                     <span className="text-sm text-green-800 font-medium">Scanner is currently active</span>
                   </div>
+                </div>
+              ) : (
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center">
+                    <Lock className="h-4 w-4 text-gray-500 mr-2" />
+                    <span className="text-sm text-gray-600">Scanner features are disabled</span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Enable the scanner above to access QR code scanning features
+                  </p>
                 </div>
               )}
             </CardContent>
@@ -135,11 +146,12 @@ const SettingsPage: React.FC = () => {
           </Card>
 
           {/* Appearance Settings */}
-          <Card>
+          <Card className={!darkMode ? 'opacity-75 border-gray-300' : ''}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Palette className="h-5 w-5" />
                 Appearance
+                {!darkMode && <Lock className="h-4 w-4 text-gray-400" />}
               </CardTitle>
               <CardDescription>
                 Customize the look and feel of your interface
@@ -158,15 +170,28 @@ const SettingsPage: React.FC = () => {
                   onCheckedChange={setDarkMode}
                 />
               </div>
+
+              {!darkMode && (
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center">
+                    <Lock className="h-4 w-4 text-gray-500 mr-2" />
+                    <span className="text-sm text-gray-600">Dark mode features are disabled</span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Enable dark mode to access theme customization options
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
           {/* Notification Settings */}
-          <Card>
+          <Card className={!notifications ? 'opacity-75 border-gray-300' : ''}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Bell className="h-5 w-5" />
                 Notifications
+                {!notifications && <Lock className="h-4 w-4 text-gray-400" />}
               </CardTitle>
               <CardDescription>
                 Manage your notification preferences
@@ -185,6 +210,18 @@ const SettingsPage: React.FC = () => {
                   onCheckedChange={setNotifications}
                 />
               </div>
+
+              {!notifications && (
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center">
+                    <Lock className="h-4 w-4 text-gray-500 mr-2" />
+                    <span className="text-sm text-gray-600">Notification features are disabled</span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Enable notifications to receive system alerts and updates
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
