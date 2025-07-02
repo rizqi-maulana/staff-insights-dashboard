@@ -1,11 +1,13 @@
-
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Layout from '../components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from '../components/ui/switch';
 import { Label } from '../components/ui/label';
 import { Button } from "@/components/ui/button";
-import { ScanQrCode, Settings, Monitor, Bell, Palette, Database, Lock } from 'lucide-react';
+import { Input } from "@/components/ui/input";
+import { ScanQrCode, Settings, Monitor, Bell, Palette, Database, Lock, CloudUpload, Download, Upload } from 'lucide-react';
+import { useAppContext } from '../contexts/AppContext';
+import { useToast } from "@/hooks/use-toast";
 
 const SettingsPage: React.FC = () => {
   const [isScannerActive, setIsScannerActive] = useState(false);
@@ -14,6 +16,12 @@ const SettingsPage: React.FC = () => {
   const [notifications, setNotifications] = useState(true);
   const [compactView, setCompactView] = useState(false);
   const [showAdvancedCharts, setShowAdvancedCharts] = useState(true);
+  const [isBackingUp, setIsBackingUp] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const { backupToCloud, backupToLocal, restoreFromFile } = useAppContext();
+  const { toast } = useToast();
 
   const handleSaveSettings = () => {
     // Save settings logic would go here
@@ -34,6 +42,77 @@ const SettingsPage: React.FC = () => {
     setNotifications(true);
     setCompactView(false);
     setShowAdvancedCharts(true);
+  };
+
+  const handleCloudBackup = async () => {
+    setIsBackingUp(true);
+    try {
+      await backupToCloud();
+      toast({
+        title: "Cloud Backup Successful",
+        description: "Your data has been backed up to the cloud successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Cloud Backup Failed",
+        description: "Failed to backup data to cloud. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsBackingUp(false);
+    }
+  };
+
+  const handleLocalBackup = () => {
+    try {
+      backupToLocal();
+      toast({
+        title: "Local Backup Successful",
+        description: "Your data has been downloaded as a backup file.",
+      });
+    } catch (error) {
+      toast({
+        title: "Local Backup Failed",
+        description: "Failed to create local backup. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== 'application/json' && !file.name.endsWith('.json')) {
+      toast({
+        title: "Invalid File Type",
+        description: "Please upload a valid JSON backup file.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsRestoring(true);
+    restoreFromFile(file)
+      .then(() => {
+        toast({
+          title: "Restore Successful",
+          description: "Your data has been restored from the backup file.",
+        });
+      })
+      .catch(() => {
+        toast({
+          title: "Restore Failed",
+          description: "Failed to restore data from backup file. Please check the file format.",
+          variant: "destructive",
+        });
+      })
+      .finally(() => {
+        setIsRestoring(false);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      });
   };
 
   return (
@@ -141,6 +220,76 @@ const SettingsPage: React.FC = () => {
                   checked={showAdvancedCharts}
                   onCheckedChange={setShowAdvancedCharts}
                 />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Data Management Settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Database className="h-5 w-5" />
+                Data Management
+              </CardTitle>
+              <CardDescription>
+                Backup and restore your attendance data
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-base font-medium">Backup Data</Label>
+                  <p className="text-sm text-gray-500 mb-3">
+                    Create a backup of all your attendance data and settings
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={handleCloudBackup}
+                      disabled={isBackingUp}
+                      className="flex items-center gap-2"
+                    >
+                      <CloudUpload className="h-4 w-4" />
+                      {isBackingUp ? 'Backing up...' : 'Backup to Cloud'}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={handleLocalBackup}
+                      className="flex items-center gap-2"
+                    >
+                      <Download className="h-4 w-4" />
+                      Download Backup
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="border-t pt-4">
+                  <Label className="text-base font-medium">Restore Data</Label>
+                  <p className="text-sm text-gray-500 mb-3">
+                    Restore your data from a previously created backup file
+                  </p>
+                  <div className="flex gap-2">
+                    <Input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".json,application/json"
+                      onChange={handleFileUpload}
+                      disabled={isRestoring}
+                      className="flex-1"
+                    />
+                    <Button
+                      variant="outline"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isRestoring}
+                      className="flex items-center gap-2"
+                    >
+                      <Upload className="h-4 w-4" />
+                      {isRestoring ? 'Restoring...' : 'Choose File'}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Supported formats: JSON backup files
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>

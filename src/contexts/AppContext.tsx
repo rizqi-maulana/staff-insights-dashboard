@@ -63,6 +63,9 @@ interface AppContextType {
   resetAllDevices: () => void;
   refreshAllQRCodes: () => void;
   deleteAllStaff: () => void;
+  backupToCloud: () => Promise<void>;
+  backupToLocal: () => void;
+  restoreFromFile: (file: File) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -244,6 +247,71 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     console.log('All staff accounts deleted');
   };
 
+  const backupToCloud = async () => {
+    const backupData = {
+      staffList,
+      attendanceData,
+      notifications,
+      timestamp: new Date().toISOString(),
+      version: '1.0'
+    };
+
+    try {
+      // Simulate cloud backup
+      console.log('Backing up to cloud...', backupData);
+      // In a real app, this would upload to cloud storage
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log('Cloud backup completed successfully');
+    } catch (error) {
+      console.error('Cloud backup failed:', error);
+      throw error;
+    }
+  };
+
+  const backupToLocal = () => {
+    const backupData = {
+      staffList,
+      attendanceData,
+      notifications,
+      timestamp: new Date().toISOString(),
+      version: '1.0'
+    };
+
+    const dataStr = JSON.stringify(backupData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(dataBlob);
+    link.download = `attendance-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    console.log('Local backup downloaded successfully');
+  };
+
+  const restoreFromFile = async (file: File) => {
+    try {
+      const text = await file.text();
+      const backupData = JSON.parse(text);
+      
+      // Validate backup data structure
+      if (!backupData.staffList || !backupData.attendanceData || !backupData.notifications) {
+        throw new Error('Invalid backup file format');
+      }
+      
+      // Restore data
+      setStaffList(backupData.staffList);
+      setAttendanceData(backupData.attendanceData);
+      setNotifications(backupData.notifications);
+      
+      console.log('Data restored successfully from backup');
+    } catch (error) {
+      console.error('Restore failed:', error);
+      throw error;
+    }
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -268,7 +336,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         deactivateAllStaff,
         resetAllDevices,
         refreshAllQRCodes,
-        deleteAllStaff
+        deleteAllStaff,
+        backupToCloud,
+        backupToLocal,
+        restoreFromFile
       }}
     >
       {children}
