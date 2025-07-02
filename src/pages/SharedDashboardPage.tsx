@@ -1,67 +1,82 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams, Navigate } from 'react-router-dom';
 import Layout from '../components/Layout';
-import MobileNav from '../components/MobileNav';
 import { useAppContext } from '../contexts/AppContext';
 import AttendanceBarChart from '../components/charts/AttendanceBarChart';
 import RoleDonutChart from '../components/charts/RoleDonutChart';
 import AttendanceLineChart from '../components/charts/AttendanceLineChart';
-import TodayAttendanceModal from '../components/modals/TodayAttendanceModal';
-import ShareAnalysisModal from '../components/modals/ShareAnalysisModal';
-import { Share } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { Shield, Eye } from 'lucide-react';
 
-const DashboardPage: React.FC = () => {
-  const { dateRange, setDateRange, attendanceData, staffList } = useAppContext();
-  const [isTodayAttendanceModalOpen, setIsTodayAttendanceModalOpen] = useState(false);
-  const [isShareAnalysisModalOpen, setIsShareAnalysisModalOpen] = useState(false);
+const SharedDashboardPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const { attendanceData, staffList, isLoggedIn } = useAppContext();
+  const [dateRange, setDateRange] = useState<'day' | 'week' | 'month'>('day');
+  
+  const analisa = searchParams.get('analisa');
+  const token = searchParams.get('token');
+  
+  // Check if this is a valid shared dashboard request
+  const isValidShare = analisa === 'view' && token;
+  
+  // Redirect to login if not authenticated
+  if (!isLoggedIn) {
+    return <Navigate to="/" replace />;
+  }
+  
+  // Redirect if not a valid share request
+  if (!isValidShare) {
+    return <Navigate to="/dashboard" replace />;
+  }
   
   return (
     <Layout>
-      <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
+      <div className="mb-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Shield className="text-blue-600" size={20} />
+          <span className="text-sm text-gray-600">Shared Dashboard Analysis</span>
+        </div>
         
-        <div className="mt-4 md:mt-0 flex items-center gap-4">
-          <Button
-            onClick={() => setIsShareAnalysisModalOpen(true)}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <Share size={16} />
-            Share Analysis
-          </Button>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-3">
+            <Eye className="text-gray-500" size={24} />
+            <h1 className="text-2xl font-bold">Dashboard Analysis (Shared View)</h1>
+          </div>
           
-          <div className="inline-flex rounded-md shadow-sm">
-            <button
-              onClick={() => setDateRange('day')}
-              className={`px-4 py-2 text-sm font-medium rounded-l-md border ${
-                dateRange === 'day'
-                  ? 'bg-primary text-white border-primary'
-                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              Day
-            </button>
-            <button
-              onClick={() => setDateRange('week')}
-              className={`px-4 py-2 text-sm font-medium border-t border-b ${
-                dateRange === 'week'
-                  ? 'bg-primary text-white border-primary'
-                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              Week
-            </button>
-            <button
-              onClick={() => setDateRange('month')}
-              className={`px-4 py-2 text-sm font-medium rounded-r-md border ${
-                dateRange === 'month'
-                  ? 'bg-primary text-white border-primary'
-                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              Month
-            </button>
+          <div className="mt-4 md:mt-0">
+            <div className="inline-flex rounded-md shadow-sm">
+              <button
+                onClick={() => setDateRange('day')}
+                className={`px-4 py-2 text-sm font-medium rounded-l-md border ${
+                  dateRange === 'day'
+                    ? 'bg-primary text-white border-primary'
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                Day
+              </button>
+              <button
+                onClick={() => setDateRange('week')}
+                className={`px-4 py-2 text-sm font-medium border-t border-b ${
+                  dateRange === 'week'
+                    ? 'bg-primary text-white border-primary'
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                Week
+              </button>
+              <button
+                onClick={() => setDateRange('month')}
+                className={`px-4 py-2 text-sm font-medium rounded-r-md border ${
+                  dateRange === 'month'
+                    ? 'bg-primary text-white border-primary'
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                Month
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -82,10 +97,7 @@ const DashboardPage: React.FC = () => {
           </div>
         </div>
         
-        <div 
-          className="card-container cursor-pointer hover:shadow-md transition-shadow"
-          onClick={() => setIsTodayAttendanceModalOpen(true)}
-        >
+        <div className="card-container">
           <h2 className="text-lg font-semibold">Today's Attendance</h2>
           <p className="text-3xl font-bold mt-2">
             {attendanceData.filter(a => {
@@ -126,7 +138,6 @@ const DashboardPage: React.FC = () => {
               </p>
             </div>
           </div>
-          <p className="text-xs text-gray-400 mt-2">Click to view details</p>
         </div>
         
         <div className="card-container md:col-span-2 lg:col-span-1">
@@ -177,20 +188,8 @@ const DashboardPage: React.FC = () => {
       <div className="mt-6">
         <RoleDonutChart data={staffList} />
       </div>
-      
-      <TodayAttendanceModal
-        isOpen={isTodayAttendanceModalOpen}
-        onClose={() => setIsTodayAttendanceModalOpen(false)}
-      />
-      
-      <ShareAnalysisModal
-        isOpen={isShareAnalysisModalOpen}
-        onClose={() => setIsShareAnalysisModalOpen(false)}
-      />
-      
-      <MobileNav />
     </Layout>
   );
 };
 
-export default DashboardPage;
+export default SharedDashboardPage;

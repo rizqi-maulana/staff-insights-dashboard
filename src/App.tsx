@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppProvider } from "./contexts/AppContext";
 import LandingPage from "./pages/LandingPage";
 import DashboardPage from "./pages/DashboardPage";
+import SharedDashboardPage from "./pages/SharedDashboardPage";
 import StaffListPage from "./pages/StaffListPage";
 import AddStaffPage from "./pages/AddStaffPage";
 import StaffManagementPage from "./pages/StaffManagementPage";
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/server" element={<Navigate to="/" replace />} />
             <Route path="/login" element={<Navigate to="/" replace />} />
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/dashboard/shared" element={<SharedDashboardPage />} />
             <Route path="/staff" element={<StaffListPage />} />
             <Route path="/staff/add" element={<AddStaffPage />} />
             <Route path="/staff/edit/:staffId" element={<AddStaffPage />} />
