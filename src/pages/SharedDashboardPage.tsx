@@ -1,41 +1,58 @@
 
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, Navigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { useAppContext } from '../contexts/AppContext';
 import AttendanceBarChart from '../components/charts/AttendanceBarChart';
 import RoleDonutChart from '../components/charts/RoleDonutChart';
 import AttendanceLineChart from '../components/charts/AttendanceLineChart';
+import AccessKeyEntryModal from '../components/modals/AccessKeyEntryModal';
 import { Button } from "@/components/ui/button";
-import { Shield, Eye } from 'lucide-react';
+import { Shield, Eye, Key } from 'lucide-react';
 
 const SharedDashboardPage: React.FC = () => {
-  const [searchParams] = useSearchParams();
-  const { attendanceData, staffList, isLoggedIn } = useAppContext();
+  const { attendanceData, staffList } = useAppContext();
   const [dateRange, setDateRange] = useState<'day' | 'week' | 'month'>('day');
+  const [hasAccess, setHasAccess] = useState(false);
+  const [showKeyEntry, setShowKeyEntry] = useState(true);
   
-  const analisa = searchParams.get('analisa');
-  const token = searchParams.get('token');
-  
-  // Check if this is a valid shared dashboard request
-  const isValidShare = analisa === 'view' && token;
-  
-  // Redirect to login if not authenticated
-  if (!isLoggedIn) {
-    return <Navigate to="/" replace />;
-  }
-  
-  // Redirect if not a valid share request
-  if (!isValidShare) {
-    return <Navigate to="/dashboard" replace />;
+  const handleAccessGranted = () => {
+    setHasAccess(true);
+    setShowKeyEntry(false);
+  };
+
+  // If no access yet, show the key entry modal
+  if (!hasAccess) {
+    return (
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <Key size={64} className="mx-auto mb-4 text-gray-400" />
+            <h1 className="text-2xl font-bold mb-2">Dashboard Analysis Access</h1>
+            <p className="text-gray-600 mb-6">
+              Please enter your access key to view the shared dashboard analysis
+            </p>
+            <Button onClick={() => setShowKeyEntry(true)}>
+              Enter Access Key
+            </Button>
+          </div>
+          
+          <AccessKeyEntryModal
+            isOpen={showKeyEntry}
+            onClose={() => setShowKeyEntry(false)}
+            onSuccess={handleAccessGranted}
+          />
+        </div>
+      </Layout>
+    );
   }
   
   return (
     <Layout>
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-4">
-          <Shield className="text-blue-600" size={20} />
-          <span className="text-sm text-gray-600">Shared Dashboard Analysis</span>
+          <Shield className="text-green-600" size={20} />
+          <span className="text-sm text-green-600">Access Granted - Shared Dashboard Analysis</span>
         </div>
         
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">

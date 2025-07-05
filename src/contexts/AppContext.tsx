@@ -40,6 +40,18 @@ export interface Notification {
   staffName?: string;
 }
 
+// Add new interface for access keys
+export interface AccessKey {
+  id: string;
+  key: string;
+  name: string;
+  createdAt: string;
+  expiresAt?: string;
+  isActive: boolean;
+  accessCount: number;
+  lastAccessedAt?: string;
+}
+
 interface AppContextType {
   serverAddress: string;
   setServerAddress: (address: string) => void;
@@ -66,6 +78,11 @@ interface AppContextType {
   backupToCloud: () => Promise<void>;
   backupToLocal: () => void;
   restoreFromFile: (file: File) => Promise<void>;
+  accessKeys: AccessKey[];
+  generateAccessKey: (name: string, expiresInDays?: number) => AccessKey;
+  deleteAccessKey: (id: string) => void;
+  validateAccessKey: (key: string) => boolean;
+  incrementKeyUsage: (key: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -174,6 +191,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [attendanceData, setAttendanceData] = useState<Attendance[]>(sampleAttendance);
   const [notifications, setNotifications] = useState<Notification[]>(sampleNotifications);
   const [dateRange, setDateRange] = useState<'day' | 'week' | 'month'>('day');
+  const [accessKeys, setAccessKeys] = useState<AccessKey[]>([]);
 
   const login = async (username: string, password: string): Promise<boolean> => {
     // Simulate authentication
@@ -312,6 +330,46 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   };
 
+  const generateAccessKey = (name: string, expiresInDays?: number): AccessKey => {
+    const newKey: AccessKey = {
+      id: Math.random().toString(36).substring(2, 15),
+      key: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+      name,
+      createdAt: new Date().toISOString(),
+      expiresAt: expiresInDays ? new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000).toISOString() : undefined,
+      isActive: true,
+      accessCount: 0,
+      lastAccessedAt: undefined
+    };
+    
+    setAccessKeys(prev => [...prev, newKey]);
+    return newKey;
+  };
+
+  const deleteAccessKey = (id: string) => {
+    setAccessKeys(prev => prev.filter(key => key.id !== id));
+  };
+
+  const validateAccessKey = (key: string): boolean => {
+    const accessKey = accessKeys.find(k => k.key === key && k.isActive);
+    if (!accessKey) return false;
+    
+    // Check if expired
+    if (accessKey.expiresAt && new Date(accessKey.expiresAt) < new Date()) {
+      return false;
+    }
+    
+    return true;
+  };
+
+  const incrementKeyUsage = (key: string) => {
+    setAccessKeys(prev => prev.map(k => 
+      k.key === key 
+        ? { ...k, accessCount: k.accessCount + 1, lastAccessedAt: new Date().toISOString() }
+        : k
+    ));
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -339,7 +397,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         deleteAllStaff,
         backupToCloud,
         backupToLocal,
-        restoreFromFile
+        restoreFromFile,
+        accessKeys,
+        generateAccessKey,
+        deleteAccessKey,
+        validateAccessKey,
+        incrementKeyUsage
       }}
     >
       {children}
