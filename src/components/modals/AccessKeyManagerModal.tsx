@@ -1,9 +1,9 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Copy, Plus, Trash2, Key, Calendar, Clock, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAppContext } from '../../contexts/AppContext';
@@ -18,6 +18,7 @@ const AccessKeyManagerModal: React.FC<AccessKeyManagerModalProps> = ({ isOpen, o
   const { toast } = useToast();
   const [newKeyName, setNewKeyName] = useState('');
   const [expirationDays, setExpirationDays] = useState('30');
+  const [hasExpiration, setHasExpiration] = useState(true);
   const [showNewKeyForm, setShowNewKeyForm] = useState(false);
 
   const handleGenerateKey = () => {
@@ -30,16 +31,17 @@ const AccessKeyManagerModal: React.FC<AccessKeyManagerModalProps> = ({ isOpen, o
       return;
     }
 
-    const expireDays = expirationDays ? parseInt(expirationDays) : undefined;
+    const expireDays = hasExpiration && expirationDays ? parseInt(expirationDays) : undefined;
     const newKey = generateAccessKey(newKeyName.trim(), expireDays);
     
     toast({
       title: "Access Key Generated",
-      description: `New access key "${newKey.name}" has been created.`,
+      description: `New access key "${newKey.name}" has been created${hasExpiration ? ` with ${expirationDays} days expiration` : ' with no expiration'}.`,
     });
 
     setNewKeyName('');
     setExpirationDays('30');
+    setHasExpiration(true);
     setShowNewKeyForm(false);
   };
 
@@ -106,16 +108,29 @@ const AccessKeyManagerModal: React.FC<AccessKeyManagerModalProps> = ({ isOpen, o
                   placeholder="e.g., Client Review, Monthly Report"
                 />
               </div>
-              <div>
-                <Label htmlFor="expiration">Expiration (days)</Label>
-                <Input
-                  id="expiration"
-                  type="number"
-                  value={expirationDays}
-                  onChange={(e) => setExpirationDays(e.target.value)}
-                  placeholder="Leave empty for no expiration"
+              
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="hasExpiration"
+                  checked={hasExpiration}
+                  onCheckedChange={(checked) => setHasExpiration(checked as boolean)}
                 />
+                <Label htmlFor="hasExpiration">Set expiration date</Label>
               </div>
+              
+              {hasExpiration && (
+                <div>
+                  <Label htmlFor="expiration">Expiration (days)</Label>
+                  <Input
+                    id="expiration"
+                    type="number"
+                    value={expirationDays}
+                    onChange={(e) => setExpirationDays(e.target.value)}
+                    placeholder="30"
+                  />
+                </div>
+              )}
+              
               <div className="flex gap-2">
                 <Button onClick={handleGenerateKey}>Generate Key</Button>
                 <Button variant="outline" onClick={() => setShowNewKeyForm(false)}>
@@ -147,6 +162,11 @@ const AccessKeyManagerModal: React.FC<AccessKeyManagerModalProps> = ({ isOpen, o
                         {isExpired(accessKey.expiresAt) && (
                           <span className="text-xs px-2 py-1 bg-red-100 text-red-800 rounded">
                             Expired
+                          </span>
+                        )}
+                        {!accessKey.expiresAt && (
+                          <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded">
+                            No Expiration
                           </span>
                         )}
                       </div>
