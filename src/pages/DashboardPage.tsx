@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from '../components/Layout';
 import MobileNav from '../components/MobileNav';
@@ -8,7 +7,8 @@ import RoleDonutChart from '../components/charts/RoleDonutChart';
 import AttendanceLineChart from '../components/charts/AttendanceLineChart';
 import TodayAttendanceModal from '../components/modals/TodayAttendanceModal';
 import ShareAnalysisModal from '../components/modals/ShareAnalysisModal';
-import { Share, Users, Calendar, AlertCircle } from 'lucide-react';
+import AccessKeyEntryModal from '../components/modals/AccessKeyEntryModal';
+import { Share, Users, Calendar, AlertCircle, Key } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
@@ -16,9 +16,15 @@ const DashboardPage: React.FC = () => {
   const { dateRange, setDateRange, attendanceData, staffList } = useAppContext();
   const [isTodayAttendanceModalOpen, setIsTodayAttendanceModalOpen] = useState(false);
   const [isShareAnalysisModalOpen, setIsShareAnalysisModalOpen] = useState(false);
+  const [isAccessKeyEntryModalOpen, setIsAccessKeyEntryModalOpen] = useState(false);
   
   const hasStaffData = staffList.length > 0;
   const hasAttendanceData = attendanceData.length > 0;
+  
+  const handleAccessKeySuccess = () => {
+    setIsAccessKeyEntryModalOpen(false);
+    // You can add any success logic here if needed
+  };
   
   // If no staff data at all, show main empty state
   if (!hasStaffData) {
@@ -61,6 +67,15 @@ const DashboardPage: React.FC = () => {
         <h1 className="text-2xl font-bold">Dashboard</h1>
         
         <div className="mt-4 md:mt-0 flex items-center gap-4">
+          <Button
+            onClick={() => setIsAccessKeyEntryModalOpen(true)}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <Key size={16} />
+            Test Access Key
+          </Button>
+          
           <Button
             onClick={() => setIsShareAnalysisModalOpen(true)}
             variant="outline"
@@ -268,6 +283,12 @@ const DashboardPage: React.FC = () => {
       <ShareAnalysisModal
         isOpen={isShareAnalysisModalOpen}
         onClose={() => setIsShareAnalysisModalOpen(false)}
+      />
+      
+      <AccessKeyEntryModal
+        isOpen={isAccessKeyEntryModalOpen}
+        onClose={() => setIsAccessKeyEntryModalOpen(false)}
+        onSuccess={handleAccessKeySuccess}
       />
       
       <MobileNav />
