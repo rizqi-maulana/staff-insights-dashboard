@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -7,9 +7,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Sparkles, Calendar } from 'lucide-react';
+import { Sparkles, Calendar, Monitor, Smartphone } from 'lucide-react';
 
 export interface Update {
   id: string;
@@ -20,6 +21,7 @@ export interface Update {
   features: string[];
   imageUrl?: string;
   type: 'feature' | 'improvement' | 'bugfix';
+  platform: 'desktop' | 'android';
 }
 
 interface UpdateNotificationModalProps {
@@ -35,6 +37,10 @@ const UpdateNotificationModal: React.FC<UpdateNotificationModalProps> = ({
   updates,
   currentVersion,
 }) => {
+  const [selectedPlatform, setSelectedPlatform] = useState<'desktop' | 'android'>('desktop');
+
+  const filteredUpdates = updates.filter(update => update.platform === selectedPlatform);
+
   const getTypeBadgeVariant = (type: Update['type']) => {
     switch (type) {
       case 'feature':
@@ -74,9 +80,30 @@ const UpdateNotificationModal: React.FC<UpdateNotificationModalProps> = ({
           </DialogDescription>
         </DialogHeader>
 
+        <div className="flex gap-2 mb-4">
+          <Button
+            variant={selectedPlatform === 'desktop' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSelectedPlatform('desktop')}
+            className="flex items-center gap-2"
+          >
+            <Monitor className="h-4 w-4" />
+            Desktop
+          </Button>
+          <Button
+            variant={selectedPlatform === 'android' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSelectedPlatform('android')}
+            className="flex items-center gap-2"
+          >
+            <Smartphone className="h-4 w-4" />
+            Android
+          </Button>
+        </div>
+
         <ScrollArea className="max-h-[60vh] pr-4">
           <div className="space-y-6">
-            {updates.map((update) => (
+            {filteredUpdates.map((update) => (
               <Card key={update.id} className="overflow-hidden">
                 <CardHeader className="space-y-3">
                   <div className="flex items-start justify-between">

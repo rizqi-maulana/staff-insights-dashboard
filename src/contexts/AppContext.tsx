@@ -61,6 +61,7 @@ export interface AppUpdate {
   features: string[];
   imageUrl?: string;
   type: 'feature' | 'improvement' | 'bugfix';
+  platform: 'desktop' | 'android';
 }
 
 interface AppContextType {
@@ -223,7 +224,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         'Categorized updates (Features, Improvements, Bug Fixes)',
         'Detailed descriptions and feature lists'
       ],
-      type: 'feature'
+      type: 'feature',
+      platform: 'desktop'
     },
     {
       id: '2',
@@ -237,7 +239,38 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         'Track key usage and analytics',
         'Secure dashboard sharing'
       ],
-      type: 'feature'
+      type: 'feature',
+      platform: 'desktop'
+    },
+    {
+      id: '3',
+      version: '1.2.0',
+      date: 'November 1, 2025',
+      title: 'Android App Launch',
+      description: 'Download and install our brand new Android application for on-the-go access to your staff dashboard.',
+      features: [
+        'Native Android experience',
+        'Offline data sync',
+        'Push notifications for attendance updates',
+        'Fingerprint authentication support'
+      ],
+      type: 'feature',
+      platform: 'android'
+    },
+    {
+      id: '4',
+      version: '1.1.5',
+      date: 'October 20, 2025',
+      title: 'Performance Improvements',
+      description: 'Faster app loading and improved battery efficiency for the Android version.',
+      features: [
+        'Reduced app size by 30%',
+        'Optimized background sync',
+        'Better battery performance',
+        'Faster startup time'
+      ],
+      type: 'improvement',
+      platform: 'android'
     }
   ];
 
