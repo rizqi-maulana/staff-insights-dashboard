@@ -1,13 +1,20 @@
 
 import React, { useState } from 'react';
-import { Bell, LogOut } from 'lucide-react';
+import { Bell, LogOut, Sparkles } from 'lucide-react';
 import { useAppContext } from '../contexts/AppContext';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
+import UpdateNotificationModal from './modals/UpdateNotificationModal';
 
 const Header: React.FC = () => {
-  const { logout, notifications } = useAppContext();
+  const { logout, notifications, appUpdates, appVersion, hasUnreadUpdates, markUpdatesAsRead } = useAppContext();
   const unreadCount = notifications.filter(n => !n.read).length;
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  
+  const handleOpenUpdates = () => {
+    setIsUpdateModalOpen(true);
+    markUpdatesAsRead();
+  };
 
   return (
     <header className="bg-primary text-white p-4 flex justify-between items-center shadow-md">
@@ -16,6 +23,19 @@ const Header: React.FC = () => {
       </div>
       
       <div className="flex items-center space-x-4">
+        <button 
+          onClick={handleOpenUpdates}
+          className="relative"
+          title="What's New"
+        >
+          <Sparkles size={20} className="text-white hover:text-accent transition-colors" />
+          {hasUnreadUpdates && (
+            <Badge className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs px-1.5">
+              New
+            </Badge>
+          )}
+        </button>
+        
         <Link to="/notifications" className="relative">
           <Bell size={20} className="text-white hover:text-accent transition-colors" />
           {unreadCount > 0 && (
@@ -34,6 +54,13 @@ const Header: React.FC = () => {
           <span className="ml-1 hidden md:inline">Logout</span>
         </button>
       </div>
+      
+      <UpdateNotificationModal
+        isOpen={isUpdateModalOpen}
+        onClose={() => setIsUpdateModalOpen(false)}
+        updates={appUpdates}
+        currentVersion={appVersion}
+      />
     </header>
   );
 };

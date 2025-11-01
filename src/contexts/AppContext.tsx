@@ -52,6 +52,17 @@ export interface AccessKey {
   lastAccessedAt?: string;
 }
 
+export interface AppUpdate {
+  id: string;
+  version: string;
+  date: string;
+  title: string;
+  description: string;
+  features: string[];
+  imageUrl?: string;
+  type: 'feature' | 'improvement' | 'bugfix';
+}
+
 interface AppContextType {
   serverAddress: string;
   setServerAddress: (address: string) => void;
@@ -83,6 +94,10 @@ interface AppContextType {
   deleteAccessKey: (id: string) => void;
   validateAccessKey: (key: string) => boolean;
   incrementKeyUsage: (key: string) => void;
+  appUpdates: AppUpdate[];
+  appVersion: string;
+  hasUnreadUpdates: boolean;
+  markUpdatesAsRead: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -192,6 +207,39 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [notifications, setNotifications] = useState<Notification[]>(sampleNotifications);
   const [dateRange, setDateRange] = useState<'day' | 'week' | 'month'>('day');
   const [accessKeys, setAccessKeys] = useState<AccessKey[]>([]);
+  const [hasUnreadUpdates, setHasUnreadUpdates] = useState<boolean>(true);
+  
+  const appVersion = "1.2.0";
+  const appUpdates: AppUpdate[] = [
+    {
+      id: '1',
+      version: '1.2.0',
+      date: 'November 1, 2025',
+      title: 'Update Notification System',
+      description: 'Stay informed with our new update notification system that keeps you in the loop about new features and improvements.',
+      features: [
+        'Beautiful update modal with version tracking',
+        'Visual updates with optional images',
+        'Categorized updates (Features, Improvements, Bug Fixes)',
+        'Detailed descriptions and feature lists'
+      ],
+      type: 'feature'
+    },
+    {
+      id: '2',
+      version: '1.1.0',
+      date: 'October 15, 2025',
+      title: 'Access Key Management',
+      description: 'Enhanced security with comprehensive access key management for sharing dashboard analytics.',
+      features: [
+        'Generate shareable access keys',
+        'Set expiration dates for keys',
+        'Track key usage and analytics',
+        'Secure dashboard sharing'
+      ],
+      type: 'feature'
+    }
+  ];
 
   const login = async (username: string, password: string): Promise<boolean> => {
     // Simulate authentication
@@ -370,6 +418,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     ));
   };
 
+  const markUpdatesAsRead = () => {
+    setHasUnreadUpdates(false);
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -402,7 +454,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         generateAccessKey,
         deleteAccessKey,
         validateAccessKey,
-        incrementKeyUsage
+        incrementKeyUsage,
+        appUpdates,
+        appVersion,
+        hasUnreadUpdates,
+        markUpdatesAsRead
       }}
     >
       {children}
