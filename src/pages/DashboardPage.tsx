@@ -8,7 +8,8 @@ import AttendanceLineChart from '../components/charts/AttendanceLineChart';
 import TodayAttendanceModal from '../components/modals/TodayAttendanceModal';
 import ShareAnalysisModal from '../components/modals/ShareAnalysisModal';
 import AccessKeyEntryModal from '../components/modals/AccessKeyEntryModal';
-import { Share, Users, Calendar, AlertCircle, Key } from 'lucide-react';
+import AnnouncementModal from '../components/modals/AnnouncementModal';
+import { Share, Users, Calendar, AlertCircle, Key, Bell } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
@@ -17,6 +18,22 @@ const DashboardPage: React.FC = () => {
   const [isTodayAttendanceModalOpen, setIsTodayAttendanceModalOpen] = useState(false);
   const [isShareAnalysisModalOpen, setIsShareAnalysisModalOpen] = useState(false);
   const [isAccessKeyEntryModalOpen, setIsAccessKeyEntryModalOpen] = useState(false);
+  const [isAnnouncementModalOpen, setIsAnnouncementModalOpen] = useState(true);
+  
+  const announcements = [
+    {
+      date: '2025-11-07',
+      author: 'Admin',
+      heading: 'Welcome to ScanHadir Dashboard',
+      text: 'Thank you for using ScanHadir! This is your centralized platform for managing staff attendance efficiently. Explore the dashboard to view analytics, manage staff, and track attendance records.'
+    },
+    {
+      date: '2025-11-05',
+      author: 'System',
+      heading: 'New Features Available',
+      text: 'We have added new reporting features including share analysis and access key management. Check out the dashboard buttons to explore these new capabilities.'
+    }
+  ];
   
   const hasStaffData = staffList.length > 0;
   const hasAttendanceData = attendanceData.length > 0;
@@ -67,6 +84,16 @@ const DashboardPage: React.FC = () => {
         <h1 className="text-2xl font-bold">Dashboard</h1>
         
         <div className="mt-4 md:mt-0 flex items-center gap-4">
+          <Button
+            onClick={() => setIsAnnouncementModalOpen(true)}
+            variant="outline"
+            className="flex items-center gap-2 relative"
+          >
+            <Bell size={16} />
+            Announcements
+            <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+          </Button>
+          
           <Button
             onClick={() => setIsAccessKeyEntryModalOpen(true)}
             variant="outline"
@@ -289,6 +316,12 @@ const DashboardPage: React.FC = () => {
         isOpen={isAccessKeyEntryModalOpen}
         onClose={() => setIsAccessKeyEntryModalOpen(false)}
         onSuccess={handleAccessKeySuccess}
+      />
+      
+      <AnnouncementModal
+        isOpen={isAnnouncementModalOpen}
+        onClose={() => setIsAnnouncementModalOpen(false)}
+        announcements={announcements}
       />
       
       <MobileNav />
