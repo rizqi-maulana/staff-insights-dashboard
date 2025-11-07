@@ -35,7 +35,7 @@ const LandingPage: React.FC = () => {
           {/* Logo/Title */}
           <div className="space-y-2">
             <h1 className="text-4xl font-bold text-foreground">ScanHadir</h1>
-            <p className="text-muted-foreground">Staff Management Dashboard</p>
+            <p className="text-muted-foreground uppercase tracking-wide">Staff Management Dashboard</p>
           </div>
           
           {/* Illustration */}
